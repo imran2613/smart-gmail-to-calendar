@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import pool from '@/lib/db';
 import { fetchRecentEmails } from '@/lib/gmail';
 import { analyzeEmail } from '@/lib/ai';
 import { createCalendarEvent } from '@/lib/calendar';
@@ -17,7 +17,8 @@ export async function GET(request: Request) {
   console.log('Starting background sync...');
 
   try {
-    const users = db.prepare('SELECT id, accessToken, refreshToken FROM Users WHERE refreshToken IS NOT NULL').all() as any[];
+    const usersResult = await pool.query('SELECT id, accessToken, refreshToken FROM Users WHERE refreshToken IS NOT NULL');
+    const users = usersResult.rows;
 
     let processedCount = 0;
     let eventsCreated = 0;
@@ -31,8 +32,8 @@ export async function GET(request: Request) {
 
         for (const email of emails) {
           // Check if already processed
-          const checkStmt = db.prepare('SELECT id FROM ProcessedEmails WHERE messageId = ? AND userId = ?');
-          const exists = checkStmt.get(email.id, user.id);
+          const checkResult = await pool.query('SELECT id FROM ProcessedEmails WHERE messageId = $1 AND userId = $2', [email.id, user.id]);
+          const exists = checkResult.rows.length > 0;
 
           if (exists) {
              continue; // Already processed
@@ -48,9 +49,11 @@ export async function GET(request: Request) {
           }
 
           // Mark as processed
-          const insertStmt = db.prepare('INSERT INTO ProcessedEmails (id, userId, messageId) VALUES (?, ?, ?)');
-          // Using a simple random string for ID for now, normally use UUID
-          insertStmt.run(Math.random().toString(36).substring(7), user.id, email.id);
+          await pool.query('INSERT INTO ProcessedEmails (id, userId, messageId) VALUES ($1, $2, $3)', [
+            Math.random().toString(36).substring(7), 
+            user.id, 
+            email.id
+          ]);
           processedCount++;
         }
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { oauth2Client } from '@/lib/google';
-import db from '@/lib/db';
+import pool from '@/lib/db';
 import { google } from 'googleapis';
 
 export async function GET(request: Request) {
@@ -29,25 +29,23 @@ export async function GET(request: Request) {
       throw new Error('Could not retrieve user info');
     }
 
-    // Save or update user in SQLite DB
-    const stmt = db.prepare(`
+    // Save or update user in Postgres DB
+    await pool.query(`
       INSERT INTO Users (id, email, name, picture, accessToken, refreshToken)
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4, $5, $6)
       ON CONFLICT(id) DO UPDATE SET
-        accessToken = excluded.accessToken,
-        refreshToken = coalesce(excluded.refreshToken, Users.refreshToken),
-        name = excluded.name,
-        picture = excluded.picture
-    `);
-
-    stmt.run(
+        accessToken = EXCLUDED.accessToken,
+        refreshToken = COALESCE(EXCLUDED.refreshToken, Users.refreshToken),
+        name = EXCLUDED.name,
+        picture = EXCLUDED.picture
+    `, [
       userInfo.id,
       userInfo.email,
       userInfo.name || '',
       userInfo.picture || '',
       tokens.access_token || '',
       tokens.refresh_token || null // Important: Might be undefined if not first time
-    );
+    ]);
 
     // Set a simple cookie for frontend authentication (1 year expiry)
     const response = NextResponse.redirect(new URL('/dashboard', request.url));

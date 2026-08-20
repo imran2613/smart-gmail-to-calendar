@@ -1,33 +1,37 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
+import { Pool } from 'pg';
 
-// Initialize the database in the project root
-const dbPath = path.join(process.cwd(), 'app.db');
-const db = new Database(dbPath);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
-// Enable foreign keys
-db.pragma('journal_mode = WAL');
+export const initDb = async () => {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS Users (
+        id VARCHAR(255) PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        name VARCHAR(255),
+        picture TEXT,
+        accessToken TEXT,
+        refreshToken TEXT,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
-// Initialize schema if not exists
-db.exec(`
-  CREATE TABLE IF NOT EXISTS Users (
-    id TEXT PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    name TEXT,
-    picture TEXT,
-    accessToken TEXT,
-    refreshToken TEXT,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
+      CREATE TABLE IF NOT EXISTS ProcessedEmails (
+        id VARCHAR(255) PRIMARY KEY,
+        userId VARCHAR(255) NOT NULL,
+        messageId VARCHAR(255) NOT NULL,
+        processedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(userId) REFERENCES Users(id)
+      );
+    `);
+    console.log('Database tables verified/created successfully.');
+  } catch (error) {
+    console.error('Error initializing database:', error);
+  } finally {
+    client.release();
+  }
+};
 
-  CREATE TABLE IF NOT EXISTS ProcessedEmails (
-    id TEXT PRIMARY KEY,
-    userId TEXT NOT NULL,
-    messageId TEXT NOT NULL,
-    processedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(userId) REFERENCES Users(id)
-  );
-`);
-
-export default db;
+export default pool;

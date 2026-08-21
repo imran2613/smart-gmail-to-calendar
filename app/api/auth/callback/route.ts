@@ -59,6 +59,10 @@ export async function GET(request: Request) {
     return response;
   } catch (error) {
     console.error('OAuth Callback Error:', error);
-    return NextResponse.redirect(new URL('/?error=AuthFailed', request.url));
+    return NextResponse.json({ 
+      error: 'AuthFailed', 
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined 
+    }, { status: 500 });
   }
 }

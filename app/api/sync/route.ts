@@ -22,6 +22,7 @@ export async function GET(request: Request) {
 
     let processedCount = 0;
     let eventsCreated = 0;
+    const createdEventsDetails: Array<{ title: string; date: string }> = [];
 
     for (const user of users) {
       console.log(`Processing user: ${user.id}`);
@@ -46,6 +47,10 @@ export async function GET(request: Request) {
              console.log(`Email is actionable! Creating calendar event...`);
              await createCalendarEvent(user.accessToken, user.refreshToken, aiResult);
              eventsCreated++;
+             createdEventsDetails.push({
+               title: aiResult.title || 'Actionable Item',
+               date: aiResult.dueDate || 'No specific date'
+             });
           }
 
           // Mark as processed
@@ -62,7 +67,12 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, processedCount, eventsCreated });
+    return NextResponse.json({ 
+      success: true, 
+      processedCount, 
+      eventsCreated,
+      createdEvents: createdEventsDetails 
+    });
 
   } catch (error) {
     console.error('Sync error:', error);

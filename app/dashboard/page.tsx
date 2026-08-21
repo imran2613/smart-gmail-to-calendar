@@ -7,7 +7,11 @@ import { LogOut, RefreshCw, CheckCircle2 } from 'lucide-react';
 export default function Dashboard() {
   const router = useRouter();
   const [isSyncing, setIsSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<{ processedCount: number; eventsCreated: number } | null>(null);
+  const [syncResult, setSyncResult] = useState<{ 
+    processedCount: number; 
+    eventsCreated: number;
+    createdEvents?: Array<{ title: string; date: string }>;
+  } | null>(null);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -22,7 +26,11 @@ export default function Dashboard() {
       const res = await fetch('/api/sync');
       const data = await res.json();
       if (data.success) {
-        setSyncResult({ processedCount: data.processedCount, eventsCreated: data.eventsCreated });
+        setSyncResult({ 
+          processedCount: data.processedCount, 
+          eventsCreated: data.eventsCreated,
+          createdEvents: data.createdEvents 
+        });
       }
     } catch (e) {
       console.error(e);
@@ -72,6 +80,22 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {syncResult && syncResult.createdEvents && syncResult.createdEvents.length > 0 && (
+          <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: '#e2e8f0' }}>Events Added to Calendar:</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {syncResult.createdEvents.map((event, idx) => (
+                <div key={idx} style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ fontWeight: 600, color: '#f8fafc', marginBottom: '0.25rem' }}>{event.title}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+                    {event.date !== 'No specific date' ? new Date(event.date).toLocaleString() : 'No specific date'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

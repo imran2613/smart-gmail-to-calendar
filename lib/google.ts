@@ -5,9 +5,9 @@ const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const getBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  if (process.env.VERCEL_URL) {
-    // If it's a vercel deployment URL, we hardcode the production one to avoid Google rejecting dynamic URLs
-    return 'https://gmail2cal-krjs.vercel.app';
+  if (process.env.RENDER_EXTERNAL_URL) {
+    // Render provides this environment variable automatically for web services
+    return process.env.RENDER_EXTERNAL_URL;
   }
   return 'http://localhost:3000';
 };

@@ -7,6 +7,7 @@ import { LogOut, RefreshCw, CheckCircle2 } from 'lucide-react';
 export default function Dashboard() {
   const router = useRouter();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [syncResult, setSyncResult] = useState<{ 
     processedCount: number; 
     eventsCreated: number;
@@ -31,6 +32,7 @@ export default function Dashboard() {
           eventsCreated: data.eventsCreated,
           createdEvents: data.createdEvents 
         });
+        setShowModal(true);
       }
     } catch (e) {
       console.error(e);
@@ -72,31 +74,52 @@ export default function Dashboard() {
             <RefreshCw size={18} className={isSyncing ? "animate-spin" : ""} /> 
             {isSyncing ? 'Syncing...' : 'Force Sync Now'}
           </button>
-          
-          {syncResult && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.75rem 1rem', borderRadius: '0.5rem' }}>
-              <CheckCircle2 size={18} />
-              Processed {syncResult.processedCount} emails. Created {syncResult.eventsCreated} events!
-            </div>
-          )}
         </div>
+      </div>
 
-        {syncResult && syncResult.createdEvents && syncResult.createdEvents.length > 0 && (
-          <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: '#e2e8f0' }}>Events Added to Calendar:</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {syncResult.createdEvents.map((event, idx) => (
-                <div key={idx} style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{ fontWeight: 600, color: '#f8fafc', marginBottom: '0.25rem' }}>{event.title}</div>
-                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                    {event.date !== 'No specific date' ? new Date(event.date).toLocaleString() : 'No specific date'}
-                  </div>
+      {/* Sync Success Modal */}
+      {showModal && syncResult && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50
+        }}>
+          <div className="glass-card" style={{ width: '90%', maxWidth: '500px', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: '#10b981' }}>
+              <CheckCircle2 size={28} />
+              <h2 style={{ fontSize: '1.5rem', color: '#f8fafc', margin: 0 }}>Sync Complete!</h2>
+            </div>
+            
+            <p style={{ fontSize: '1.1rem', color: '#cbd5e1', marginBottom: '1.5rem' }}>
+              Scanned <strong>{syncResult.processedCount}</strong> events and added <strong>{syncResult.eventsCreated}</strong> events to your calendar.
+            </p>
+
+            {syncResult.createdEvents && syncResult.createdEvents.length > 0 && (
+              <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.5rem', maxHeight: '250px', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {syncResult.createdEvents.map((event, idx) => (
+                    <div key={idx} style={{ borderBottom: idx < syncResult.createdEvents!.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none', paddingBottom: idx < syncResult.createdEvents!.length - 1 ? '0.75rem' : '0' }}>
+                      <div style={{ fontWeight: 600, color: '#f8fafc' }}>{event.title}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                        {event.date !== 'No specific date' ? new Date(event.date).toLocaleString() : 'No specific date'}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="btn btn-primary"
+              >
+                Awesome!
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </main>
   );
 }

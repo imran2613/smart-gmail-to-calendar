@@ -4,6 +4,8 @@ import { fetchRecentEmails } from '@/lib/gmail';
 import { analyzeEmail } from '@/lib/ai';
 import { createCalendarEvent } from '@/lib/calendar';
 
+export const maxDuration = 60; // Allow Vercel to run this function for up to 60 seconds (Hobby limit)
+
 export async function GET(request: Request) {
   // Simple cron security check can go here (e.g., checking a secret header)
   const authHeader = request.headers.get('authorization');

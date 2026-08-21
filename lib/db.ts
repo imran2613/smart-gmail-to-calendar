@@ -35,3 +35,6 @@ export const initDb = async () => {
 };
 
 export default pool;
+
+// Auto-initialize tables when this module is loaded
+initDb().catch(console.error);

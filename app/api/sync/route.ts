@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import pool from '@/lib/db';
 import { fetchRecentEmails } from '@/lib/gmail';
 import { analyzeEmail } from '@/lib/ai';
@@ -7,11 +8,15 @@ import { createCalendarEvent } from '@/lib/calendar';
 export const maxDuration = 60; // Allow Vercel to run this function for up to 60 seconds (Hobby limit)
 
 export async function GET(request: Request) {
-  // Simple cron security check can go here (e.g., checking a secret header)
+  // Security check: allow if valid CRON_SECRET header OR if user is logged in (has cookie)
   const authHeader = request.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    // For local dev, we might allow bypassing this. Let's just warn if in prod
-    if (process.env.NODE_ENV === 'production') {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('userId')?.value;
+
+  if (process.env.NODE_ENV === 'production') {
+    const hasValidCronSecret = process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const isLoggedInUser = !!userId;
+    if (!hasValidCronSecret && !isLoggedInUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }

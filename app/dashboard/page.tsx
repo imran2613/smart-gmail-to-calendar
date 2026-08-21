@@ -26,6 +26,10 @@ export default function Dashboard() {
     try {
       const res = await fetch('/api/sync');
       const data = await res.json();
+      if (!res.ok) {
+        alert(`Sync failed (${res.status}): ${data.error || JSON.stringify(data)}`);
+        return;
+      }
       if (data.success) {
         setSyncResult({ 
           processedCount: data.processedCount, 
@@ -33,6 +37,8 @@ export default function Dashboard() {
           createdEvents: data.createdEvents 
         });
         setShowModal(true);
+      } else {
+        alert(`Sync returned failure: ${JSON.stringify(data)}`);
       }
     } catch (e) {
       console.error(e);

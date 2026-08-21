@@ -17,7 +17,8 @@ export async function GET(request: Request) {
   console.log('Starting background sync...');
 
   try {
-    const usersResult = await pool.query('SELECT id, accessToken, refreshToken FROM Users WHERE refreshToken IS NOT NULL');
+    // PostgreSQL lowercases unquoted column names in the result set
+    const usersResult = await pool.query('SELECT id, accesstoken, refreshtoken FROM Users WHERE refreshtoken IS NOT NULL');
     const users = usersResult.rows;
 
     let processedCount = 0;
@@ -28,7 +29,8 @@ export async function GET(request: Request) {
       console.log(`Processing user: ${user.id}`);
       
       try {
-        const emails = await fetchRecentEmails(user.accessToken, user.refreshToken);
+        // Use lowercase keys because pg returns them lowercased
+        const emails = await fetchRecentEmails(user.accesstoken, user.refreshtoken);
         console.log(`Fetched ${emails.length} recent emails.`);
 
         for (const email of emails) {
@@ -45,7 +47,7 @@ export async function GET(request: Request) {
 
           if (aiResult && aiResult.isActionable) {
              console.log(`Email is actionable! Creating calendar event...`);
-             await createCalendarEvent(user.accessToken, user.refreshToken, aiResult);
+             await createCalendarEvent(user.accesstoken, user.refreshtoken, aiResult);
              eventsCreated++;
              createdEventsDetails.push({
                title: aiResult.title || 'Actionable Item',

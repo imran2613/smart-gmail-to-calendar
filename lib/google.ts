@@ -2,9 +2,13 @@ import { google } from 'googleapis';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = process.env.NEXT_PUBLIC_BASE_URL 
-  ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/callback` 
-  : 'http://localhost:3000/api/auth/callback';
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+};
+
+const REDIRECT_URI = `${getBaseUrl()}/api/auth/callback`;
 
 export const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,

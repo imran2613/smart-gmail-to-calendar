@@ -37,7 +37,7 @@ Respond ONLY with the JSON object. No markdown formatting or backticks.
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
          responseMimeType: 'application/json',

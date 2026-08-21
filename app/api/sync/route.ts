@@ -45,7 +45,12 @@ export async function GET(request: Request) {
           console.log(`Analyzing email: ${email.subject}`);
           const aiResult = await analyzeEmail(email.subject, email.from, email.bodyText);
 
-          if (aiResult && aiResult.isActionable) {
+          if (aiResult === null) {
+             console.error('Failed to analyze email due to AI error, skipping mark as processed.');
+             continue; // Skip the insert into ProcessedEmails so we can retry later
+          }
+
+          if (aiResult.isActionable) {
              console.log(`Email is actionable! Creating calendar event...`);
              await createCalendarEvent(user.accesstoken, user.refreshtoken, aiResult);
              eventsCreated++;

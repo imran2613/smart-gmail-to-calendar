@@ -1,9 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
-
-const key = process.env.GEMINI_API_KEY;
-console.log('Initializing GoogleGenAI. Key present:', !!key, key ? `(starts with: ${key.substring(0, 10)}...)` : '');
-const ai = new GoogleGenAI({ apiKey: key });
-
 export interface ExtractedEmailData {
   isActionable: boolean;
   category?: 'Bill' | 'Payment' | 'Meeting' | 'Assignment' | 'Deadline' | 'Other';
@@ -14,6 +8,12 @@ export interface ExtractedEmailData {
 }
 
 export async function analyzeEmail(subject: string, from: string, bodyText: string): Promise<ExtractedEmailData | null> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error('GEMINI_API_KEY is not set!');
+    return null;
+  }
+
   const prompt = `
 You are a Smart Email Assistant. Your job is to read an email and extract important actionable details if they exist.
 Actionable items include: Bills, Payments due, Meetings, Assignments, or Deadlines.
@@ -26,46 +26,63 @@ ${bodyText}
 
 Output the result as a strict JSON object with the following schema:
 {
-  "isActionable": boolean, // true if it's a bill, meeting, deadline, etc., false otherwise
+  "isActionable": boolean,
   "category": string, // One of: "Bill", "Payment", "Meeting", "Assignment", "Deadline", "Other"
   "amount": string, // e.g. "₹1,850" or null if not applicable
-  "dueDate": string, // ISO Date string (e.g. "2026-08-28T10:00:00Z") of when it is due or happening. Convert relative dates to exact dates based on the current context if possible. Use null if no date is found.
-  "title": string, // A concise, descriptive title for a calendar event (e.g., "Electricity Bill Payment")
+  "dueDate": string, // ISO Date string (e.g. "2026-08-28T10:00:00Z") or null
+  "title": string, // A concise, descriptive title for a calendar event
   "priority": string // "High", "Medium", or "Low"
 }
 
 Respond ONLY with the JSON object. No markdown formatting or backticks.
 `;
 
-  const callModel = async (modelName: string) => {
-    return await ai.models.generateContent({
-      model: modelName,
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-      }
-    });
-  };
+  // Try multiple API versions and models via direct REST calls (bypass SDK entirely)
+  const attempts = [
+    { version: 'v1beta', model: 'gemini-2.0-flash' },
+    { version: 'v1', model: 'gemini-2.0-flash' },
+    { version: 'v1beta', model: 'gemini-2.0-flash-lite' },
+    { version: 'v1', model: 'gemini-pro' },
+  ];
 
-  // Try the primary model, fall back on any error
-  for (const model of ['gemini-2.0-flash', 'gemini-2.0-flash-lite']) {
+  for (const { version, model } of attempts) {
+    const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${apiKey}`;
+    console.log(`Trying Gemini REST API: ${version}/models/${model}`);
+
     try {
-      console.log(`Attempting email analysis with model: ${model}`);
-      const response = await callModel(model);
-      const text = response.text;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.text();
+        console.error(`Gemini ${version}/${model} returned ${res.status}: ${errBody}`);
+        continue; // try next model/version
+      }
+
+      const json = await res.json();
+      const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+
       if (!text) {
-        console.warn(`Model ${model} returned empty response`);
+        console.warn(`Gemini ${version}/${model} returned empty text`);
         continue;
       }
 
-      const sanitizedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const data: ExtractedEmailData = JSON.parse(sanitizedText);
-      return data;
+      console.log(`Gemini ${version}/${model} SUCCESS! Response:`, text.substring(0, 200));
+      const sanitized = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(sanitized) as ExtractedEmailData;
     } catch (error) {
-      console.error(`Error analyzing email with Gemini (${model}):`, error);
+      console.error(`Gemini ${version}/${model} fetch error:`, error);
     }
   }
 
-  console.error('All Gemini models failed to analyze the email.');
+  console.error('All Gemini API attempts failed.');
   return null;
 }

@@ -39,10 +39,10 @@ Respond ONLY with the JSON object. No markdown formatting or backticks.
 
   // Try multiple API versions and models via direct REST calls (bypass SDK entirely)
   const attempts = [
-    { version: 'v1beta', model: 'gemini-2.0-flash' },
-    { version: 'v1', model: 'gemini-2.0-flash' },
-    { version: 'v1beta', model: 'gemini-2.0-flash-lite' },
-    { version: 'v1', model: 'gemini-pro' },
+    { version: 'v1beta', model: 'gemini-3.5-flash' },
+    { version: 'v1beta', model: 'gemini-3.5-flash-lite' },
+    { version: 'v1', model: 'gemini-3.5-flash' },
+    { version: 'v1', model: 'gemini-3.5-flash-lite' },
   ];
 
   for (const { version, model } of attempts) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { oauth2Client } from '@/lib/google';
+import { oauth2Client, getBaseUrl } from '@/lib/google';
 import pool from '@/lib/db';
 import { google } from 'googleapis';
 
@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
 
   if (!code) {
-    return NextResponse.redirect(new URL('/?error=NoCode', request.url));
+    return NextResponse.redirect(new URL('/?error=NoCode', getBaseUrl()));
   }
 
   try {
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     ]);
 
     // Set a simple cookie for frontend authentication (1 year expiry)
-    const response = NextResponse.redirect(new URL('/dashboard', request.url));
+    const response = NextResponse.redirect(new URL('/dashboard', getBaseUrl()));
     response.cookies.set('userId', userInfo.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

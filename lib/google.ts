@@ -2,7 +2,7 @@ import { google } from 'googleapis';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   const envUrl = process.env.NEXT_PUBLIC_BASE_URL;
   if (envUrl && !envUrl.includes('localhost')) {
     return envUrl;

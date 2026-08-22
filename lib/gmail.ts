@@ -19,8 +19,8 @@ export async function fetchRecentEmails(accessToken: string, refreshToken: strin
     // We fetch a small batch to process. We'll filter out already processed ones in the sync logic.
     const res = await gmail.users.messages.list({
       userId: 'me',
-      maxResults: 10,
-      q: 'in:inbox', // Only emails in inbox
+      maxResults: 20,
+      // No explicit query – fetch recent messages from all folders
     });
 
     const messages = res.data.messages || [];

@@ -25,7 +25,7 @@ ${bodyText}
 Output the result as a strict JSON object with the following schema:
 {
   "isActionable": boolean, // true if it's a bill, meeting, deadline, etc., false otherwise
-  "category": string, // One of: "Bill", "Payment", "Meeting", "Assignment", "Deadline", "Other" (only if isActionable is true)
+  "category": string, // One of: "Bill", "Payment", "Meeting", "Assignment", "Deadline", "Other"
   "amount": string, // e.g. "₹1,850" or null if not applicable
   "dueDate": string, // ISO Date string (e.g. "2026-08-28T10:00:00Z") of when it is due or happening. Convert relative dates to exact dates based on the current context if possible. Use null if no date is found.
   "title": string, // A concise, descriptive title for a calendar event (e.g., "Electricity Bill Payment")
@@ -35,24 +35,35 @@ Output the result as a strict JSON object with the following schema:
 Respond ONLY with the JSON object. No markdown formatting or backticks.
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+  const callModel = async (modelName: string) => {
+    return await ai.models.generateContent({
+      model: modelName,
       contents: prompt,
       config: {
-         responseMimeType: 'application/json',
+        responseMimeType: 'application/json',
       }
     });
+  };
 
-    const text = response.text;
-    if (!text) return null;
+  // Try the primary model, fall back to gemini-1.0-pro on any error
+  for (const model of ['gemini-1.5-flash', 'gemini-1.0-pro']) {
+    try {
+      console.log(`Attempting email analysis with model: ${model}`);
+      const response = await callModel(model);
+      const text = response.text;
+      if (!text) {
+        console.warn(`Model ${model} returned empty response`);
+        continue;
+      }
 
-    const sanitizedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const data: ExtractedEmailData = JSON.parse(sanitizedText);
-    
-    return data;
-  } catch (error) {
-    console.error('Error analyzing email with Gemini:', error);
-    return null;
+      const sanitizedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      const data: ExtractedEmailData = JSON.parse(sanitizedText);
+      return data;
+    } catch (error) {
+      console.error(`Error analyzing email with Gemini (${model}):`, error);
+    }
   }
+
+  console.error('All Gemini models failed to analyze the email.');
+  return null;
 }

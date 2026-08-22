@@ -47,8 +47,8 @@ Respond ONLY with the JSON object. No markdown formatting or backticks.
     });
   };
 
-  // Try the primary model, fall back to gemini-1.0-pro on any error
-  for (const model of ['gemini-1.5-flash', 'gemini-1.0-pro']) {
+  // Try the primary model, fall back on any error
+  for (const model of ['gemini-2.0-flash', 'gemini-2.0-flash-lite']) {
     try {
       console.log(`Attempting email analysis with model: ${model}`);
       const response = await callModel(model);

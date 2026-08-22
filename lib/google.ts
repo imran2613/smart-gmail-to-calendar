@@ -3,13 +3,15 @@ import { google } from 'googleapis';
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  const envUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  if (envUrl && !envUrl.includes('localhost')) {
+    return envUrl;
+  }
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   if (process.env.RENDER_EXTERNAL_URL) {
-    // Render provides this environment variable automatically for web services
     return process.env.RENDER_EXTERNAL_URL;
   }
-  return 'http://localhost:3000';
+  return envUrl || 'http://localhost:3000';
 };
 
 const REDIRECT_URI = `${getBaseUrl()}/api/auth/callback`;

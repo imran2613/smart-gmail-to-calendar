@@ -1,6 +1,8 @@
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const key = process.env.GEMINI_API_KEY;
+console.log('Initializing GoogleGenAI. Key present:', !!key, key ? `(starts with: ${key.substring(0, 10)}...)` : '');
+const ai = new GoogleGenAI({ apiKey: key });
 
 export interface ExtractedEmailData {
   isActionable: boolean;

@@ -1,36 +1,169 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Web Application
 
-## Getting Started
+A modern, scalable web application built with **Next.js**, **React**, and **TypeScript**. Designed with performance, maintainability, and developer experience in mind.
 
-First, run the development server:
+## 🚀 Overview
+
+This project is powered by Next.js and uses its modern App Router architecture to build fast, responsive, and scalable web applications.
+
+It includes an optimized development environment, automatic font optimization, and a streamlined deployment workflow.
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js
+- **Frontend Library:** React
+- **Language:** TypeScript
+- **Styling:** CSS
+- **Font Optimization:** Next.js Font (`next/font`)
+- **Default Font:** Geist
+- **Package Manager:** npm / Yarn / pnpm / Bun
+- **Deployment:** Vercel
+
+## 📁 Project Structure
+
+```text
+project-root/
+│
+├── app/
+│   ├── layout.tsx       # Root layout
+│   ├── page.tsx         # Main application page
+│   └── globals.css      # Global styles
+│
+├── public/              # Static assets
+│
+├── node_modules/        # Project dependencies
+│
+├── package.json         # Dependencies and scripts
+├── package-lock.json    # Dependency lock file
+├── tsconfig.json        # TypeScript configuration
+├── next.config.ts       # Next.js configuration
+└── README.md            # Project documentation
+```
+
+## ⚙️ Getting Started
+
+Follow these instructions to set up and run the project locally.
+
+### 1. Prerequisites
+
+Make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/)
+- npm, Yarn, pnpm, or Bun
+- A code editor such as [Visual Studio Code](https://code.visualstudio.com/)
+
+### 2. Clone the Repository
+
+```bash
+git clone <YOUR_REPOSITORY_URL>
+```
+
+Navigate into the project directory:
+
+```bash
+cd <PROJECT_DIRECTORY>
+```
+
+### 3. Install Dependencies
+
+Using npm:
+
+```bash
+npm install
+```
+
+Alternatively:
+
+```bash
+yarn install
+```
+
+```bash
+pnpm install
+```
+
+```bash
+bun install
+```
+
+### 4. Run the Development Server
+
+Using npm:
 
 ```bash
 npm run dev
-# or
+```
+
+Alternatively:
+
+```bash
 yarn dev
-# or
+```
+
+```bash
 pnpm dev
-# or
+```
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 5. Open in Browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Visit the following URL:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```text
+http://localhost:3000
+```
 
-## Learn More
+Your application should now be running locally.
 
-To learn more about Next.js, take a look at the following resources:
+## 💻 Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Start customizing the application by editing:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+app/page.tsx
+```
 
-## Deploy on Vercel
+The development server automatically refreshes the browser when you save changes.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+You can modify the following files:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/page.tsx` – Main application interface.
+- `app/layout.tsx` – Application root layout and metadata.
+- `app/globals.css` – Global styling and design.
+
+## 📚 Resources
+
+Explore the following resources to learn more about the technologies used:
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Next.js Learn](https://nextjs.org/learn)
+- [React Documentation](https://react.dev/)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [Next.js GitHub Repository](https://github.com/vercel/next.js)
+
+## 🚀 Deployment
+
+The recommended deployment platform for this project is [Vercel](https://vercel.com/).
+
+### Deploy using Vercel
+
+1. Push your project to GitHub.
+2. Sign in to Vercel.
+3. Import your GitHub repository.
+4. Configure the required environment variables, if any.
+5. Click **Deploy**.
+
+Vercel automatically detects Next.js projects and configures the appropriate build settings.
+
+For additional information, refer to the [Next.js Deployment Documentation](https://nextjs.org/docs/app/building-your-application/deploying).
+
+## 📄 License
+
+This project is intended for learning and development purposes. Add an appropriate open-source license if you plan to distribute it publicly.
+
+---
+
+**Built with ❤️ using Next.js and TypeScript.**

@@ -1,169 +1,101 @@
-# Next.js Web Application
+# 📅 Smart Gmail to Calendar (`smart-gmail-to-calendar`)
 
-A modern, scalable web application built with **Next.js**, **React**, and **TypeScript**. Designed with performance, maintainability, and developer experience in mind.
+An autonomous AI-powered assistant that reads your Gmail inbox, extracts actionable deadlines, meetings, bills, and assignments using **Google Gemini AI**, and automatically schedules them into **Google Calendar** with intelligent priority reminders.
 
-## 🚀 Overview
+---
 
-This project is powered by Next.js and uses its modern App Router architecture to build fast, responsive, and scalable web applications.
+## 🌟 Highlights & Key Features
 
-It includes an optimized development environment, automatic font optimization, and a streamlined deployment workflow.
+- 🤖 **Gemini AI NLP Extraction:** Parses unorganized emails into structured JSON with category, title, exact due date, monetary amount, and priority.
+- ⚡ **Zero-Click Google Calendar Sync:** Automatically creates calendar events with 1-hour, 1-day, or 3-day popup and email reminders depending on urgency.
+- 🔄 **Idempotent Background Sync:** Prevents duplicate calendar events using a PostgreSQL audit registry (`ProcessedEmails`).
+- 🔐 **Secure Google OAuth 2.0:** Offline token exchange enables uninterrupted 24/7 background cron synchronization.
+- 🎨 **Futuristic Glassmorphism UI:** Built with Next.js 16 (App Router), React 19, and Lucide React icons.
+
+---
+
+## 📖 Complete Documentation
+
+For an exhaustive, pin-to-pin architectural guide with full source code, database schemas, sequence diagrams, and real-world use cases, see:
+
+👉 **[PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md)**
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** Next.js
-- **Frontend Library:** React
-- **Language:** TypeScript
-- **Styling:** CSS
-- **Font Optimization:** Next.js Font (`next/font`)
-- **Default Font:** Geist
-- **Package Manager:** npm / Yarn / pnpm / Bun
-- **Deployment:** Vercel
+- **Framework:** Next.js 16.3.1 (App Router), React 19, TypeScript
+- **AI Engine:** Google Gemini REST API (`gemini-3.5-flash`, `gemini-3.5-flash-lite`)
+- **APIs:** Google Gmail API v1, Google Calendar API v3 (`googleapis`)
+- **Database:** PostgreSQL (`pg` connection pool)
+- **Styling:** Custom CSS Glassmorphism & Lucide Icons
+- **Cron Automation:** Vercel Cron (`vercel.json`)
+
+---
 
 ## 📁 Project Structure
 
 ```text
-project-root/
-│
+smart-gmail-to-calendar/
 ├── app/
-│   ├── layout.tsx       # Root layout
-│   ├── page.tsx         # Main application page
-│   └── globals.css      # Global styles
-│
-├── public/              # Static assets
-│
-├── node_modules/        # Project dependencies
-│
-├── package.json         # Dependencies and scripts
-├── package-lock.json    # Dependency lock file
-├── tsconfig.json        # TypeScript configuration
-├── next.config.ts       # Next.js configuration
-└── README.md            # Project documentation
+│   ├── api/
+│   │   ├── auth/
+│   │   │   ├── callback/route.ts  # Handles OAuth2 callback, token exchange & database upsert
+│   │   │   ├── login/route.ts     # Generates Google OAuth URL and initiates login
+│   │   │   └── logout/route.ts    # Clears HTTP-only session cookies
+│   │   ├── debug-env/route.ts     # Diagnostic endpoint to verify env vars in production
+│   │   ├── debug-sync/route.ts    # Comprehensive step-by-step diagnostic test pipeline
+│   │   └── sync/route.ts          # Core background sync runner (Cron + Manual trigger)
+│   ├── dashboard/page.tsx         # Authenticated user dashboard with live force-sync modal
+│   ├── globals.css                # Global glassmorphism stylesheet & responsive variables
+│   ├── layout.tsx                 # Root layout with Inter font and HTML metadata
+│   └── page.tsx                   # Public landing page with features showcase & login CTA
+├── lib/
+│   ├── ai.ts                      # Direct REST Gemini API client with fallback cascade
+│   ├── calendar.ts                # Google Calendar v3 event builder and reminder calculator
+│   ├── db.ts                      # PostgreSQL connection pool and table initializer
+│   ├── gmail.ts                   # Gmail v1 message list & base64/HTML body extractor
+│   └── google.ts                  # OAuth2 client instance, scopes, and dynamic URL resolver
+├── PROJECT_DOCUMENTATION.md       # Pin-to-pin comprehensive project documentation
+├── vercel.json                    # Cron job schedule definition
+└── package.json
 ```
+
+---
 
 ## ⚙️ Getting Started
 
-Follow these instructions to set up and run the project locally.
-
-### 1. Prerequisites
-
-Make sure you have the following installed:
-
-- [Node.js](https://nodejs.org/)
-- npm, Yarn, pnpm, or Bun
-- A code editor such as [Visual Studio Code](https://code.visualstudio.com/)
-
-### 2. Clone the Repository
-
+### 1. Clone the Repository
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone https://github.com/imran2613/smart-gmail-to-calendar.git
+cd smart-gmail-to-calendar
 ```
 
-Navigate into the project directory:
-
-```bash
-cd <PROJECT_DIRECTORY>
-```
-
-### 3. Install Dependencies
-
-Using npm:
-
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-Alternatively:
-
-```bash
-yarn install
-```
-
-```bash
-pnpm install
-```
-
-```bash
-bun install
+### 3. Configure Environment Variables
+Create `.env.local` in the project root:
+```env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GEMINI_API_KEY=your-gemini-api-key
+DATABASE_URL=postgresql://user:pass@host:port/dbname?sslmode=require
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+CRON_SECRET=your-cron-secret
 ```
 
 ### 4. Run the Development Server
-
-Using npm:
-
 ```bash
 npm run dev
 ```
 
-Alternatively:
-
-```bash
-yarn dev
-```
-
-```bash
-pnpm dev
-```
-
-```bash
-bun dev
-```
-
-### 5. Open in Browser
-
-Visit the following URL:
-
-```text
-http://localhost:3000
-```
-
-Your application should now be running locally.
-
-## 💻 Development
-
-Start customizing the application by editing:
-
-```text
-app/page.tsx
-```
-
-The development server automatically refreshes the browser when you save changes.
-
-You can modify the following files:
-
-- `app/page.tsx` – Main application interface.
-- `app/layout.tsx` – Application root layout and metadata.
-- `app/globals.css` – Global styling and design.
-
-## 📚 Resources
-
-Explore the following resources to learn more about the technologies used:
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Next.js Learn](https://nextjs.org/learn)
-- [React Documentation](https://react.dev/)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Next.js GitHub Repository](https://github.com/vercel/next.js)
-
-## 🚀 Deployment
-
-The recommended deployment platform for this project is [Vercel](https://vercel.com/).
-
-### Deploy using Vercel
-
-1. Push your project to GitHub.
-2. Sign in to Vercel.
-3. Import your GitHub repository.
-4. Configure the required environment variables, if any.
-5. Click **Deploy**.
-
-Vercel automatically detects Next.js projects and configures the appropriate build settings.
-
-For additional information, refer to the [Next.js Deployment Documentation](https://nextjs.org/docs/app/building-your-application/deploying).
-
-## 📄 License
-
-This project is intended for learning and development purposes. Add an appropriate open-source license if you plan to distribute it publicly.
+Visit `http://localhost:3000` to launch the application.
 
 ---
 
-**Built with ❤️ using Next.js and TypeScript.**
+## 📄 License & Attribution
+
+Built with Next.js, Google Gemini, and TypeScript.

@@ -860,3 +860,4 @@ CRON_SECRET=your-random-cron-secret-token
 ---
 
 *Authored for the Smart Gmail to Calendar (`smart-gmail-to-calendar`) project.*
+
